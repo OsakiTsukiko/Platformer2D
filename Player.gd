@@ -22,6 +22,7 @@ var is_dashing: bool = false
 var can_dash: bool = false
 var is_coyote: bool = false
 var air_jump_pressed: bool = false
+var is_jumping: bool = false
 
 var velocity: Vector2 = Vector2.ZERO
 
@@ -53,6 +54,7 @@ func ground_checks() -> void:
 	if (touching_ground):
 		is_dashing = false
 		can_dash = true
+		is_jumping = false
 		velocity.y = 0
 
 func do_physics(delta: float):
@@ -95,9 +97,10 @@ func handle_input(delta: float):
 	
 	# Handle Jumping
 	
-	if (is_coyote):
+	if (is_coyote && !is_jumping):
 		if (Input.is_action_just_pressed("jump")):
 			velocity.y = -1 * MAX_SPEED.y * delta
+			is_jumping = true
 	
 	if (touching_ground):
 		if (
@@ -107,6 +110,7 @@ func handle_input(delta: float):
 			)
 		):
 			velocity.y = -1 * MAX_SPEED.y * delta
+			is_jumping = true
 	
 	if (!touching_ground):
 		if (Input.is_action_just_released("jump") && velocity.y < 0.0):
