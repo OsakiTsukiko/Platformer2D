@@ -4,12 +4,12 @@ onready var ground_rc_1 = $RC1
 onready var ground_rc_2 = $RC2
 
 # PSEUDO CONSTANTS
-export var GRAVITY_VEC: Vector2 = Vector2(0.0, 5000.0)
-export var MAX_SPEED: Vector2 = Vector2(50000.0, 120000.0)
+export var GRAVITY_VEC: Vector2 = Vector2(0.0, 10000.0)
+export var MAX_SPEED: Vector2 = Vector2(50000.0, 175000.0)
 export var ACCELERATION: Vector2 = Vector2(7000.0, 0.0)
 export var FRICTION: Vector2 = Vector2(7000.0, 0.0)
 export var FLOOR_NORMAL: Vector2 = Vector2.UP # NOT A CONSTANT BUT EH
-export var MAX_FALL_SPEED: float = 900
+export var MAX_FALL_SPEED: float = 2000
 # ^ this might be useful for weird gravity stuff
 export var COYOTE_TIME: float = 0.1
 export var AIR_JUMP_TIME: float = 0.1
