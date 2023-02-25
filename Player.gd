@@ -38,9 +38,7 @@ func ground_checks() -> void:
 		!(ground_rc_1.is_colliding() || ground_rc_2.is_colliding())
 	):
 		touching_ground = false
-		is_coyote = true
-		yield(get_tree().create_timer(COYOTE_TIME), "timeout")
-		is_coyote = false
+		async_coyote_timer()
 	
 	# check when player just touched the ground
 	if (
@@ -117,6 +115,14 @@ func handle_input(delta: float):
 			velocity.y *= min(VAR_JUMP_CONST * delta, 1)
 		
 		if (Input.is_action_just_pressed("jump")):
-			air_jump_pressed = true
-			yield(get_tree().create_timer(AIR_JUMP_TIME), "timeout")
-			air_jump_pressed = false
+			async_air_jump_timer()
+
+func async_coyote_timer():
+	is_coyote = true
+	yield(get_tree().create_timer(COYOTE_TIME), "timeout")
+	is_coyote = false
+
+func async_air_jump_timer():
+	air_jump_pressed = true
+	yield(get_tree().create_timer(AIR_JUMP_TIME), "timeout")
+	air_jump_pressed = false
