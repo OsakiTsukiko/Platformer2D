@@ -1,7 +1,9 @@
 extends KinematicBody2D
 
-onready var ground_rc_1 = $RC1
-onready var ground_rc_2 = $RC2
+onready var ground_rc_1 = $GroundRC1
+onready var ground_rc_2 = $GroundRC2
+onready var left_rc = $LeftRC
+onready var right_rc = $RightRC
 
 # PSEUDO CONSTANTS
 export var GRAVITY_VEC: Vector2 = Vector2(0.0, 10000.0)
@@ -10,10 +12,13 @@ export var ACCELERATION: Vector2 = Vector2(7000.0, 0.0)
 export var FRICTION: Vector2 = Vector2(7000.0, 0.0)
 export var FLOOR_NORMAL: Vector2 = Vector2.UP # NOT A CONSTANT BUT EH
 export var MAX_FALL_SPEED: float = 2000
+export var MAX_WALL_FALL_SPEED: float = 100
 # ^ this might be useful for weird gravity stuff
 export var COYOTE_TIME: float = 0.1
 export var AIR_JUMP_TIME: float = 0.1
 export var VAR_JUMP_CONST: float = 30
+
+export var IS_DEBUGGING: bool = true
 
 # VARIABLES
 var touching_ground: bool = false
@@ -27,6 +32,16 @@ var is_jumping: bool = false
 var velocity: Vector2 = Vector2.ZERO
 
 func _physics_process(delta):
+	if (IS_DEBUGGING):
+		prints(
+			"G",
+			ground_rc_1.is_colliding(),
+			ground_rc_2.is_colliding(),
+			"L",
+			left_rc.is_colliding(),
+			"R",
+			right_rc.is_colliding()
+		)
 	ground_checks()
 	handle_input(delta)
 	do_physics(delta)
@@ -62,11 +77,23 @@ func do_physics(delta: float):
 	
 	if (!is_dashing):
 		velocity.y += GRAVITY_VEC.y * delta
+		if (
+			(
+				left_rc.is_colliding() &&
+				Input.is_action_pressed("left")
+			) ||
+			(
+				right_rc.is_colliding() &&
+				Input.is_action_pressed("right")
+			)
+		):
+			velocity.y = min(velocity.y, MAX_WALL_FALL_SPEED)
 		velocity.y = min(velocity.y, MAX_FALL_SPEED)
 
 	velocity = move_and_slide(velocity, FLOOR_NORMAL)
 	
-	print(velocity)
+	if (IS_DEBUGGING):
+		print(velocity)
 	
 	# add tween animations
 

@@ -17,12 +17,22 @@ texture = ExtResource( 2 )
 position = Vector2( 0, -32 )
 shape = SubResource( 1 )
 
-[node name="RC1" type="RayCast2D" parent="."]
+[node name="GroundRC1" type="RayCast2D" parent="."]
 position = Vector2( -32, 0 )
 enabled = true
 cast_to = Vector2( 0, 1 )
 
-[node name="RC2" type="RayCast2D" parent="."]
+[node name="GroundRC2" type="RayCast2D" parent="."]
 position = Vector2( 32, 0 )
 enabled = true
 cast_to = Vector2( 0, 1 )
+
+[node name="LeftRC" type="RayCast2D" parent="."]
+position = Vector2( -32, -32 )
+enabled = true
+cast_to = Vector2( -1, 0 )
+
+[node name="RightRC" type="RayCast2D" parent="."]
+position = Vector2( 32, -32 )
+enabled = true
+cast_to = Vector2( 1, 0 )
