@@ -8,6 +8,7 @@ onready var right_rc = $RightRC
 # PSEUDO CONSTANTS
 export var GRAVITY_VEC: Vector2 = Vector2(0.0, 10000.0)
 export var MAX_SPEED: Vector2 = Vector2(50000.0, 175000.0)
+export var WALL_JUMP_SPEED: Vector2 = Vector2(50000.0, 150000.0)
 export var ACCELERATION: Vector2 = Vector2(7000.0, 0.0)
 export var FRICTION: Vector2 = Vector2(7000.0, 0.0)
 export var FLOOR_NORMAL: Vector2 = Vector2.UP # NOT A CONSTANT BUT EH
@@ -17,6 +18,7 @@ export var MAX_WALL_FALL_SPEED: float = 100
 export var COYOTE_TIME: float = 0.1
 export var AIR_JUMP_TIME: float = 0.1
 export var VAR_JUMP_CONST: float = 30
+export var WALL_JUMP_TIME: float = 0.3
 
 export var IS_DEBUGGING: bool = true
 
@@ -28,6 +30,7 @@ var can_dash: bool = false
 var is_coyote: bool = false
 var air_jump_pressed: bool = false
 var is_jumping: bool = false
+var is_wall_jumping: bool = false
 
 var velocity: Vector2 = Vector2.ZERO
 
@@ -42,6 +45,7 @@ func _physics_process(delta):
 			"R",
 			right_rc.is_colliding()
 		)
+	
 	ground_checks()
 	handle_input(delta)
 	do_physics(delta)
@@ -109,9 +113,9 @@ func handle_input(delta: float):
 #	velocity.x += input_vector.x * ACCELERATION.x * delta
 #	if (abs(velocity.x) > SPEED.x):
 #		velocity.x = sign(velocity.x) * SPEED.x
-	if (abs(velocity.x) < MAX_SPEED.x * delta):
+	if (abs(velocity.x) < MAX_SPEED.x * delta && !is_wall_jumping):
 		velocity.x += input_vector.x * ACCELERATION.x * delta
-	if (abs(velocity.x) >= MAX_SPEED.x * delta):
+	if (abs(velocity.x) >= MAX_SPEED.x * delta && !is_wall_jumping):
 		velocity.x = input_vector.x * MAX_SPEED.x * delta
 	
 	if (input_vector.x == 0):
@@ -121,6 +125,28 @@ func handle_input(delta: float):
 		) * sign(velocity.x)
 	
 	# Handle Jumping
+	
+	if (
+		left_rc.is_colliding() &&
+		Input.is_action_pressed("left") &&
+		Input.is_action_just_pressed("jump") &&
+		!touching_ground
+	):
+		async_wall_jump_time()
+		velocity.y = -1 * WALL_JUMP_SPEED.y * delta
+		velocity.x = WALL_JUMP_SPEED.x * delta
+		is_jumping = true
+	
+	if (
+		right_rc.is_colliding() &&
+		Input.is_action_pressed("right") &&
+		Input.is_action_just_pressed("jump") &&
+		!touching_ground
+	):
+		async_wall_jump_time()
+		velocity.y = -1 * WALL_JUMP_SPEED.y * delta
+		velocity.x = -1 * WALL_JUMP_SPEED.x * delta
+		is_jumping = true
 	
 	if (is_coyote && !is_jumping):
 		if (Input.is_action_just_pressed("jump")):
@@ -153,3 +179,8 @@ func async_air_jump_timer():
 	air_jump_pressed = true
 	yield(get_tree().create_timer(AIR_JUMP_TIME), "timeout")
 	air_jump_pressed = false
+
+func async_wall_jump_time():
+	is_wall_jumping = true
+	yield(get_tree().create_timer(WALL_JUMP_TIME), "timeout")
+	is_wall_jumping = false
