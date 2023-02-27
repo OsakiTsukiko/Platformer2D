@@ -20,9 +20,9 @@ export var AIR_JUMP_TIME: float = 0.1
 export var VAR_JUMP_CONST: float = 30
 export var WALL_JUMP_TIME: float = 0.3
 export var DASH_TIME: float = 0.1
-export var DASH_POWER: float = 200000.0
+export var DASH_POWER: float = 230000.0
 
-export var IS_DEBUGGING: bool = true
+export var IS_DEBUGGING: bool = OS.is_debug_build()
 
 # VARIABLES
 var touching_ground: bool = false
@@ -95,7 +95,7 @@ func do_physics(delta: float):
 		):
 			velocity.y = min(velocity.y, MAX_WALL_FALL_SPEED)
 		velocity.y = min(velocity.y, MAX_FALL_SPEED)
-
+	
 	velocity = move_and_slide(velocity, FLOOR_NORMAL)
 	
 	if (IS_DEBUGGING):

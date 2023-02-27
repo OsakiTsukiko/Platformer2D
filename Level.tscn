@@ -48,3 +48,20 @@ position = Vector2( -623, 282 )
 
 [node name="Spawn" type="Position2D" parent="."]
 position = Vector2( -337, 902 )
+
+[node name="Label" type="Label" parent="."]
+margin_left = -976.0
+margin_top = -788.0
+margin_right = -519.0
+margin_bottom = -757.0
+rect_scale = Vector2( 4, 4 )
+text = "2D platformer example project by OsakiTsukiko
+
+Source Code available at
+https://github.com/OsakiTsukiko/Platformer2D
+
+Controls:
+- Horizontal Movement: Arrow Keys
+- Jump: C
+- Dash: X
+"
