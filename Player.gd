@@ -19,6 +19,8 @@ export var COYOTE_TIME: float = 0.1
 export var AIR_JUMP_TIME: float = 0.1
 export var VAR_JUMP_CONST: float = 30
 export var WALL_JUMP_TIME: float = 0.3
+export var DASH_TIME: float = 0.1
+export var DASH_POWER: float = 200000.0
 
 export var IS_DEBUGGING: bool = true
 
@@ -107,18 +109,23 @@ func handle_input(delta: float):
 	
 	var input_vector: Vector2 = Vector2(
 		float(Input.is_action_pressed("right")) - float(Input.is_action_pressed("left")),
-		float(Input.is_action_pressed("down")) - float(Input.is_action_pressed("down"))
+		float(Input.is_action_pressed("down")) - float(Input.is_action_pressed("up"))
 	)
+
+	if (can_dash && Input.is_action_just_pressed("dash")):
+		can_dash = false
+		async_dashing_timer()
+		velocity = input_vector.normalized() * DASH_POWER * delta
 
 #	velocity.x += input_vector.x * ACCELERATION.x * delta
 #	if (abs(velocity.x) > SPEED.x):
 #		velocity.x = sign(velocity.x) * SPEED.x
-	if (abs(velocity.x) < MAX_SPEED.x * delta && !is_wall_jumping):
+	if (abs(velocity.x) < MAX_SPEED.x * delta && !is_wall_jumping && !is_dashing):
 		velocity.x += input_vector.x * ACCELERATION.x * delta
-	if (abs(velocity.x) >= MAX_SPEED.x * delta && !is_wall_jumping):
+	if (abs(velocity.x) >= MAX_SPEED.x * delta && !is_wall_jumping && !is_dashing):
 		velocity.x = input_vector.x * MAX_SPEED.x * delta
 	
-	if (input_vector.x == 0):
+	if (input_vector.x == 0 && !is_dashing):
 		velocity.x -= min(
 			abs(velocity.x),
 			FRICTION.x * delta
@@ -130,7 +137,8 @@ func handle_input(delta: float):
 		left_rc.is_colliding() &&
 		Input.is_action_pressed("left") &&
 		Input.is_action_just_pressed("jump") &&
-		!touching_ground
+		!touching_ground &&
+		!is_dashing
 	):
 		async_wall_jump_time()
 		velocity.y = -1 * WALL_JUMP_SPEED.y * delta
@@ -141,19 +149,20 @@ func handle_input(delta: float):
 		right_rc.is_colliding() &&
 		Input.is_action_pressed("right") &&
 		Input.is_action_just_pressed("jump") &&
-		!touching_ground
+		!touching_ground &&
+		!is_dashing
 	):
 		async_wall_jump_time()
 		velocity.y = -1 * WALL_JUMP_SPEED.y * delta
 		velocity.x = -1 * WALL_JUMP_SPEED.x * delta
 		is_jumping = true
 	
-	if (is_coyote && !is_jumping):
+	if (is_coyote && !is_jumping && !is_dashing):
 		if (Input.is_action_just_pressed("jump")):
 			velocity.y = -1 * MAX_SPEED.y * delta
 			is_jumping = true
 	
-	if (touching_ground):
+	if (touching_ground && !is_dashing):
 		if (
 			(
 				Input.is_action_just_pressed("jump") ||
@@ -163,7 +172,7 @@ func handle_input(delta: float):
 			velocity.y = -1 * MAX_SPEED.y * delta
 			is_jumping = true
 	
-	if (!touching_ground):
+	if (!touching_ground && !is_dashing):
 		if (Input.is_action_just_released("jump") && velocity.y < 0.0):
 			velocity.y *= min(VAR_JUMP_CONST * delta, 1)
 		
@@ -184,3 +193,9 @@ func async_wall_jump_time():
 	is_wall_jumping = true
 	yield(get_tree().create_timer(WALL_JUMP_TIME), "timeout")
 	is_wall_jumping = false
+
+func async_dashing_timer():
+	is_dashing = true
+	yield(get_tree().create_timer(DASH_TIME), "timeout")
+	velocity *= .5
+	is_dashing = false
