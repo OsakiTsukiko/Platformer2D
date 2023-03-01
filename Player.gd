@@ -156,6 +156,26 @@ func handle_input(delta: float):
 		velocity.y = -1 * WALL_JUMP_SPEED.y * delta
 		velocity.x = -1 * WALL_JUMP_SPEED.x * delta
 		is_jumping = true
+# Light jump.
+	if (
+		left_rc.is_colliding() &&
+		Input.is_action_just_pressed("jump") &&
+		!touching_ground &&
+		!is_dashing
+	):
+		async_wall_jump_time()
+		velocity.y = -1 * WALL_JUMP_SPEED.y * delta
+		is_jumping = true
+
+	if (
+		right_rc.is_colliding() &&
+		Input.is_action_just_pressed("jump") &&
+		!touching_ground &&
+		!is_dashing
+	):
+		async_wall_jump_time()
+		velocity.y = -1 * WALL_JUMP_SPEED.y * delta
+		is_jumping = true
 	
 	if (is_coyote && !is_jumping && !is_dashing):
 		if (Input.is_action_just_pressed("jump")):
