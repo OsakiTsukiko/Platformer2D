@@ -9,6 +9,7 @@ onready var right_rc = $RightRC
 export var GRAVITY_VEC: Vector2 = Vector2(0.0, 10000.0)
 export var MAX_SPEED: Vector2 = Vector2(50000.0, 175000.0)
 export var WALL_JUMP_SPEED: Vector2 = Vector2(50000.0, 150000.0)
+export var LIGHT_WALL_JUMP_SPEED: Vector2 = Vector2(30000.0, 100000.0)
 export var ACCELERATION: Vector2 = Vector2(7000.0, 0.0)
 export var FRICTION: Vector2 = Vector2(7000.0, 0.0)
 export var FLOOR_NORMAL: Vector2 = Vector2.UP # NOT A CONSTANT BUT EH
@@ -125,7 +126,7 @@ func handle_input(delta: float):
 	if (abs(velocity.x) >= MAX_SPEED.x * delta && !is_wall_jumping && !is_dashing):
 		velocity.x = input_vector.x * MAX_SPEED.x * delta
 	
-	if (input_vector.x == 0 && !is_dashing):
+	if (input_vector.x == 0 && !is_wall_jumping && !is_dashing):
 		velocity.x -= min(
 			abs(velocity.x),
 			FRICTION.x * delta
@@ -135,47 +136,37 @@ func handle_input(delta: float):
 	
 	if (
 		left_rc.is_colliding() &&
-		Input.is_action_pressed("left") &&
 		Input.is_action_just_pressed("jump") &&
 		!touching_ground &&
 		!is_dashing
 	):
-		async_wall_jump_time()
-		velocity.y = -1 * WALL_JUMP_SPEED.y * delta
-		velocity.x = WALL_JUMP_SPEED.x * delta
-		is_jumping = true
+		if (Input.is_action_pressed("left")): # Normal Wall Jump
+			async_wall_jump_time()
+			velocity.y = -1 * WALL_JUMP_SPEED.y * delta
+			velocity.x = WALL_JUMP_SPEED.x * delta
+			is_jumping = true
+		else: # Light Wall Jump
+			async_wall_jump_time()
+			velocity.y = -1 * LIGHT_WALL_JUMP_SPEED.y * delta
+			velocity.x = LIGHT_WALL_JUMP_SPEED.x * delta
+			is_jumping = true
 	
 	if (
 		right_rc.is_colliding() &&
-		Input.is_action_pressed("right") &&
 		Input.is_action_just_pressed("jump") &&
 		!touching_ground &&
 		!is_dashing
 	):
-		async_wall_jump_time()
-		velocity.y = -1 * WALL_JUMP_SPEED.y * delta
-		velocity.x = -1 * WALL_JUMP_SPEED.x * delta
-		is_jumping = true
-# Light jump.
-	if (
-		left_rc.is_colliding() &&
-		Input.is_action_just_pressed("jump") &&
-		!touching_ground &&
-		!is_dashing
-	):
-		async_wall_jump_time()
-		velocity.y = -1 * WALL_JUMP_SPEED.y * delta
-		is_jumping = true
-
-	if (
-		right_rc.is_colliding() &&
-		Input.is_action_just_pressed("jump") &&
-		!touching_ground &&
-		!is_dashing
-	):
-		async_wall_jump_time()
-		velocity.y = -1 * WALL_JUMP_SPEED.y * delta
-		is_jumping = true
+		if (Input.is_action_pressed("right")): # Normal Wall Jump
+			async_wall_jump_time()
+			velocity.y = -1 * WALL_JUMP_SPEED.y * delta
+			velocity.x = -1 * WALL_JUMP_SPEED.x * delta
+			is_jumping = true
+		else: # Light Wall Jump
+			async_wall_jump_time()
+			velocity.y = -1 * LIGHT_WALL_JUMP_SPEED.y * delta
+			velocity.x = -1 * LIGHT_WALL_JUMP_SPEED.x * delta
+			is_jumping = true
 	
 	if (is_coyote && !is_jumping && !is_dashing):
 		if (Input.is_action_just_pressed("jump")):
